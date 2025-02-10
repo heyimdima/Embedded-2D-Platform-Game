@@ -1,1 +1,1 @@
-# SWE-450-Milestone 2 Source Code by Dima Bondar
+# SWE-450-Milestone 2 by Dima Bondar
