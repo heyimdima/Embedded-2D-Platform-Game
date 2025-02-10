@@ -1,1 +1,1 @@
-# SWE-450-Milestones
+# SWE-450-Milestone 2 by Dima Bondar
