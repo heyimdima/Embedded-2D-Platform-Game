@@ -1,3 +1,2 @@
-# SWE-450-Milestones
-
-# Switch branches for different milestones.
+# SWE-450-Milestones by Dima Bondar
+## Switch branches for different milestones.
