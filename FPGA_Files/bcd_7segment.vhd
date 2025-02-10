@@ -16,7 +16,7 @@ BEGIN
             -- Active low outputs for 7-segment display
             WHEN "0000" => seven_segment_out <= "1000000"; -- 0
             WHEN "0001" => seven_segment_out <= "1111001"; -- 1
-            WHEN "0010" => seven_segmentso ho_out <= "0100100"; -- 2
+            WHEN "0010" => seven_segment_out <= "0100100"; -- 2
             WHEN "0011" => seven_segment_out <= "0110000"; -- 3
             WHEN "0100" => seven_segment_out <= "0011001"; -- 4
             WHEN "0101" => seven_segment_out <= "0010010"; -- 5
