@@ -18,8 +18,6 @@ A simplified embedded implementation of the classic Doodle Jump game on the Inte
 
 This project implements a fully functional Doodle Jump game on the DE10-Standard FPGA board using bare-metal C programming. The player controls a character that continuously jumps upward, navigating randomly generated platforms while avoiding falling off the screen. The game demonstrates practical embedded systems concepts including memory-mapped I/O, real-time input processing, and efficient graphics rendering on resource-constrained hardware.
 
-<img width="1678" height="2314" alt="Game Logic Flowchart" src="https://github.com/user-attachments/assets/2e18a3f2-42d9-404a-b459-8a908349562e" />
-
 ## Features
 
 - **Real-time Gameplay**: Smooth 40 FPS game loop with gravity physics and collision detection
