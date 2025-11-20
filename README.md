@@ -254,7 +254,7 @@ assign LEDR = switch ? 10'b1111111111 : system_leds;
 
 ## Acknowledgments
 
-This project was developed as part of **SWE-450 (Embedded Systems II)** coursework. Platform generation and game loop concepts inspired by my previous [Python Doodle Jump implementation](https://github.com/heyimdima/FoxJumpGame).
+This project was developed as part of **SWE-450 (Embedded Systems II)** coursework. Platform generation and game loop concepts inspired by my previous [Python Doodle Jump implementation](https://github.com/heyimdima/fox-jump-game).
 
 Special thanks to:
 - Terasic for LCD driver library components
