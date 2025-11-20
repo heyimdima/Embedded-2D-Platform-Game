@@ -8,8 +8,8 @@ A simplified embedded implementation of the classic Doodle Jump game on the Inte
 - [Hardware Requirements](#hardware-requirements)
 - [Software Requirements](#software-requirements)
 - [System Architecture](#system-architecture)
+- [FPGA Hardware Design](#fpga-hardware-design)
 - [Game Mechanics](#game-mechanics)
-- [Building and Running](#building-and-running)
 - [Controls](#controls)
 - [Project Structure](#project-structure)
 - [Technical Highlights](#technical-highlights)
@@ -20,12 +20,13 @@ This project implements a fully functional Doodle Jump game on the DE10-Standard
 
 ## Features
 
-- **Real-time Gameplay**: Smooth game loop with gravity physics and collision detection
+- **Real-time Gameplay**: Smooth 40 FPS game loop with gravity physics and collision detection
 - **Dynamic Platform Generation**: Procedurally generated platforms for endless gameplay
 - **Score Tracking**: Live score display on 7-segment displays
 - **Pause Functionality**: Pause game using hardware switches
 - **Hardware Integration**: Direct memory-mapped I/O for all peripherals
 - **Game State Management**: Complete game initialization, play, pause, and game-over states
+- **Custom FPGA Circuits**: VHDL and Verilog modules for hardware acceleration
 
 ## Hardware Requirements
 
@@ -37,6 +38,7 @@ This project implements a fully functional Doodle Jump game on the DE10-Standard
   - 6-digit 7-segment display (score display)
   - 4 push buttons (player input)
   - 10 slide switches (pause control)
+  - 10 LEDs (pause state indicator)
 
 ## Software Requirements
 
@@ -48,7 +50,7 @@ This project implements a fully functional Doodle Jump game on the DE10-Standard
 
 ## System Architecture
 
-<img width="1833" height="1284" alt="SWE-450 Class Diagram" src="https://github.com/user-attachments/assets/90a76081-3885-4924-bacc-4fee0d695e54" />
+<img width="1833" height="1284" alt="SWE-450 Class Diagram" src="https://github.com/user-attachments/assets/4c3459fa-effd-4289-9dda-70fc7eece92f" />
 
 The project follows a modular architecture with clear separation of concerns:
 
@@ -67,7 +69,47 @@ The project follows a modular architecture with clear separation of concerns:
 - **LCD Driver Stack**: Low-level LCD hardware control (LCD_Hw, LCD_Driver, LCD_Lib)
 - **Graphics Library**: Drawing primitives (lcd_graphic, font)
 
-<img width="3632" height="3168" alt="System Design" src="https://github.com/user-attachments/assets/22ac17b3-6a5b-451d-86ea-42e3521b8e49" />
+<img width="3632" height="3168" alt="System Design" src="https://github.com/user-attachments/assets/5585f50c-4df4-4fa2-ac50-87fa0c299422" />
+
+## FPGA Hardware Design
+
+The project includes custom FPGA circuits implemented in VHDL and Verilog to interface with the board's peripherals.
+
+### BCD to 7-Segment Decoder
+
+<img width="1300" height="746" alt="digital-circuit-1" src="https://github.com/user-attachments/assets/2c632135-92e5-4ba1-b4dd-5c83fe378b3c" />
+
+A custom VHDL module converts 4-bit Binary-Coded Decimal (BCD) input to 7-segment display representation. This decoder drives six 7-segment displays simultaneously, enabling real-time score updates with minimal CPU overhead.
+
+**Key Features:**
+- Active-low output for 7-segment common anode displays
+- Supports digits 0-9 with invalid input handling
+- Direct GPIO mapping for efficient hardware control
+- Located in: `FPGA/bcd_7segment.vhd`
+
+**Implementation:**
+```vhdl
+-- Converts 4-bit BCD input to 7-segment display pattern
+-- Segments: {a, b, c, d, e, f, g}
+-- Active-low output (0 = segment ON)
+```
+
+### LED Pause Indicator
+
+<img width="928" height="370" alt="digital-circuit-2" src="https://github.com/user-attachments/assets/781437ec-0fea-4df8-8f68-6f8e103d09b3" />
+
+A Verilog multiplexer circuit provides visual feedback for the game's pause state. When SW0 is engaged, all 10 LEDs illuminate; otherwise, they reflect normal system LED states.
+
+**Implementation Details:**
+- 2-to-1 multiplexer controlled by SW0 (pause switch)
+- Overrides system LED signals during pause
+- Provides clear visual indication of game state
+- Located in: `FPGA/led_pause_override.v`
+
+**Logic:**
+```verilog
+assign LEDR = switch ? 10'b1111111111 : system_leds;
+```
 
 ## Game Mechanics
 
@@ -86,6 +128,12 @@ The project follows a modular architecture with clear separation of concerns:
 - 5-pixel collision tolerance for smooth gameplay
 - Only active when player is falling (prevents mid-air collision)
 
+### Game States
+1. **Initialization**: Reset player position, score, and generate platforms
+2. **Playing**: Active gameplay with physics and input processing
+3. **Paused**: Game frozen, all LEDs illuminated
+4. **Game Over**: Display final score with replay/exit options
+
 ## Controls
 
 | Input | Function |
@@ -94,7 +142,7 @@ The project follows a modular architecture with clear separation of concerns:
 | **KEY2** (Right button) | Move player right |
 | **KEY1** (Replay button) | Restart game after game over |
 | **KEY0** (Exit button) | Exit game |
-| **SW0** (Switch) | Pause/Resume game |
+| **SW0** (Switch) | Pause/Resume game (all LEDs illuminate when paused) |
 
 ## Project Structure
 
@@ -107,19 +155,21 @@ The project follows a modular architecture with clear separation of concerns:
 ├── seven_seg.c/h           # 7-segment display controller
 ├── push_buttons.c/h        # Button input handling
 ├── switches.c/h            # Switch state management
+├── address_map_arm.h       # Memory-mapped I/O addresses
 ├── LCD/                    # LCD driver library
 │   ├── LCD_Driver.c/h      # LCD hardware driver
 │   ├── LCD_Hw.c/h          # Low-level LCD control
 │   ├── LCD_Lib.c/h         # LCD initialization routines
-│   ├── lcd_graphic.c/h     # Graphics primitives
-│   ├── font.c/h            # Font rendering
-│   └── terasic_lib.c/h     # Utility functions
+│   ├── lcd_graphic.c/h     # Graphics primitives (lines, circles, rectangles)
+│   ├── font.c/h            # 8x16 font rendering engine
+│   └── terasic_lib.c/h     # Timing and utility functions
 ├── FPGA/                   # FPGA configuration files
-│   ├── DE10_Standard_Computer.v
-│   ├── bcd_7segment.vhd
-│   └── led_pause_override.v
-├── Makefile                # Build configuration
-└── address_map_arm.h       # Memory-mapped I/O addresses
+│   ├── DE10_Standard_Computer.v      # Top-level system integration (Verilog)
+│   ├── DE10_Standard_Computer.sdc    # Timing constraints (50MHz clock)
+│   ├── bcd_7segment.vhd              # BCD to 7-segment decoder (VHDL)
+│   └── led_pause_override.v          # Pause LED multiplexer (Verilog)
+├── Makefile                # Cross-compilation configuration
+└── README.md               # This file
 ```
 
 ## Technical Highlights
@@ -127,28 +177,89 @@ The project follows a modular architecture with clear separation of concerns:
 ### Embedded Systems Concepts Demonstrated
 
 1. **Memory-Mapped I/O**: Direct hardware register access for all peripherals
+   - GPIO manipulation for buttons, switches, and LEDs
+   - SPI communication for LCD control
+   - 7-segment display via GPIO bit-banging
+
 2. **Real-Time Processing**: Deterministic game loop with precise timing control
+   - 25ms frame time (40 FPS)
+   - Non-blocking input polling
+   - Consistent physics simulation
+
 3. **Hardware Abstraction**: Clean separation between hardware drivers and application logic
+   - Modular driver architecture
+   - Platform-independent game logic
+   - Reusable hardware interface APIs
+
 4. **Resource Management**: Efficient memory usage and proper cleanup routines
-5. **State Machine Design**: Robust game state management (init, play, pause, game over)
+   - Static memory allocation (no dynamic allocation in game loop)
+   - Proper munmap() and file descriptor cleanup
+   - Frame buffer management
+
+5. **State Machine Design**: Robust game state management
+   - Init → Play → Pause → Game Over → Replay/Exit
+   - Event-driven state transitions
+   - Clean state entry/exit handling
+
+### FPGA Design Skills
+
+- **VHDL Programming**: BCD-to-7-segment decoder with combinational logic
+  - Case statement-based lookup table
+  - Active-low output signaling
+  - Invalid input handling
+
+- **Verilog HDL**: Multiplexer design for LED control
+  - Conditional assignment operators
+  - Combinational logic synthesis
+  - Signal routing and fan-out
+
+- **Hardware Description**: Synthesizable RTL code for Cyclone V FPGA
+  - Resource-efficient designs
+  - Timing-aware implementation
+  - Platform-specific optimizations
+
+- **Timing Constraints**: SDC file configuration for reliable operation
+  - Clock domain definitions (50MHz system clock)
+  - Input/output delay constraints
+  - False path specifications
 
 ### Performance Optimizations
 
-- Frame buffering for flicker-free LCD updates
-- Efficient collision detection using bounding boxes
-- Minimal dynamic memory allocation
-- Hardware-accelerated 7-segment display updates via GPIO
+- **Frame Buffering**: Flicker-free LCD updates with double-buffering
+- **Efficient Collision Detection**: Bounding box algorithm with early exit
+- **Minimal Dynamic Allocation**: Static buffers for all game objects
+- **Hardware-Accelerated Display**: GPIO-based 7-segment updates (no CPU rendering)
+- **Optimized Rendering**: Draw only changed regions when possible
 
 ### Code Quality
 
-- Modular design with clear interface boundaries
-- Comprehensive error handling and hardware initialization checks
-- Well-documented code with detailed comments
-- Consistent coding style and naming conventions
+- **Modular Design**: Clear interface boundaries with header files
+- **Error Handling**: Comprehensive initialization checks and failure recovery
+- **Documentation**: Detailed inline comments explaining algorithms
+- **Coding Standards**: Consistent naming conventions and formatting
+- **Maintainability**: Separated concerns enable easy feature additions
+
+### Skills Demonstrated
+
+- **Low-Level Programming**: Direct memory access, bitwise operations, pointer manipulation
+- **Embedded C**: Cross-compilation, static linking, bare-metal programming
+- **Hardware Interfacing**: SPI, GPIO, memory-mapped registers
+- **Digital Logic Design**: VHDL and Verilog HDL for custom FPGA circuits
+- **Real-Time Systems**: Deterministic timing, interrupt-free polling architecture
+- **Graphics Programming**: Pixel-level rendering, drawing primitives
+- **Game Development**: Physics simulation, collision detection, procedural generation
+- **Debugging**: Hardware debugging without traditional debuggers
+- **Version Control**: Git-based development workflow
+- **Documentation**: Technical writing and system architecture documentation
 
 ## Acknowledgments
 
 This project was developed as part of **SWE-450 (Embedded Systems II)** coursework. Platform generation and game loop concepts inspired by my previous [Python Doodle Jump implementation](https://github.com/heyimdima/FoxJumpGame).
+
+Special thanks to:
+- Terasic for LCD driver library components
+- Intel/Altera for SoC EDS and development tools
+- The embedded systems community for FPGA development resources
 
 ## License
 
