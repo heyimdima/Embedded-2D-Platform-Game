@@ -18,7 +18,7 @@ A simplified embedded implementation of the classic Doodle Jump game on the Inte
 
 This project implements a fully functional Doodle Jump game on the DE10-Standard FPGA board using bare-metal C programming. The player controls a character that continuously jumps upward, navigating randomly generated platforms while avoiding falling off the screen. The game demonstrates practical embedded systems concepts including memory-mapped I/O, real-time input processing, and efficient graphics rendering on resource-constrained hardware.
 
-**[Insert: Game_Logic_Flowchart.png here]**
+<img width="1678" height="2314" alt="Game Logic Flowchart" src="https://github.com/user-attachments/assets/2e18a3f2-42d9-404a-b459-8a908349562e" />
 
 ## Features
 
@@ -50,7 +50,7 @@ This project implements a fully functional Doodle Jump game on the DE10-Standard
 
 ## System Architecture
 
-**[Insert: SWE-450_Class_Diagram.png here]**
+<img width="1833" height="1284" alt="SWE-450 Class Diagram" src="https://github.com/user-attachments/assets/90a76081-3885-4924-bacc-4fee0d695e54" />
 
 The project follows a modular architecture with clear separation of concerns:
 
@@ -69,7 +69,7 @@ The project follows a modular architecture with clear separation of concerns:
 - **LCD Driver Stack**: Low-level LCD hardware control (LCD_Hw, LCD_Driver, LCD_Lib)
 - **Graphics Library**: Drawing primitives (lcd_graphic, font)
 
-**[Insert: Untitled_FigJam.png here - System Design Diagram]**
+<img width="3632" height="3168" alt="System Design" src="https://github.com/user-attachments/assets/22ac17b3-6a5b-451d-86ea-42e3521b8e49" />
 
 ## Game Mechanics
 
@@ -87,34 +87,6 @@ The project follows a modular architecture with clear separation of concerns:
 - Bottom-edge collision detection between player and platforms
 - 5-pixel collision tolerance for smooth gameplay
 - Only active when player is falling (prevents mid-air collision)
-
-## Building and Running
-
-### 1. Cross-Compile the Project
-
-```bash
-# Open SoC EDS Command Shell
-cd /path/to/project
-make clean
-make
-```
-
-### 2. Transfer to Board
-
-```bash
-# Using SCP/FileZilla
-scp game root@<BOARD_IP>:/home/root/
-```
-
-### 3. Execute on Board
-
-```bash
-# SSH into the board
-ssh root@<BOARD_IP>
-
-# Run the game
-./game
-```
 
 ## Controls
 
