@@ -20,7 +20,7 @@ This project implements a fully functional Doodle Jump game on the DE10-Standard
 
 ## Features
 
-- **Real-time Gameplay**: Smooth 40 FPS game loop with gravity physics and collision detection
+- **Real-time Gameplay**: Smooth game loop with gravity physics and collision detection
 - **Dynamic Platform Generation**: Procedurally generated platforms for endless gameplay
 - **Score Tracking**: Live score display on 7-segment displays
 - **Pause Functionality**: Pause game using hardware switches
